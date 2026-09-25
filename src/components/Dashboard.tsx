@@ -72,14 +72,9 @@ export default function Dashboard({ user }: { user: User | null }) {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูลสรุป...</div>;
-  }
+  const totalAmount = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
 
-  const totalExpense = transactions.filter(t => !t.type || t.type === 'expense').reduce((sum, t) => sum + (t.amount || 0), 0);
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + (t.amount || 0), 0);
-  const netBalance = totalIncome - totalExpense;
-
-  // เตรียมข้อมูลสำหรับกราฟตามประเภทที่เลือก (แสดงรายรับและรายจ่าย)
+  // เตรียมข้อมูลสำหรับกราฟ (แสดงเฉพาะรายจ่าย)
   const chartDataMap = transactions.reduce((acc, t) => {
     if (!t.createdAt) return acc;
     const date = parseISO(t.createdAt);
@@ -93,16 +88,11 @@ export default function Dashboard({ user }: { user: User | null }) {
       keyStr = format(date, "MMM yy", { locale: th });
     }
 
-    if (!acc[keyStr]) acc[keyStr] = { name: keyStr, expense: 0, income: 0 };
-    
-    if (!t.type || t.type === 'expense') {
-      acc[keyStr].expense += t.amount;
-    } else {
-      acc[keyStr].income += t.amount;
-    }
+    if (!acc[keyStr]) acc[keyStr] = { name: keyStr, expense: 0 };
+    acc[keyStr].expense += t.amount;
     
     return acc;
-  }, {} as Record<string, { name: string, expense: number, income: number }>);
+  }, {} as Record<string, { name: string, expense: number }>);
 
   const chartData = Object.values(chartDataMap).reverse(); // เรียงจากเก่าไปใหม่สำหรับกราฟ
 
@@ -113,17 +103,16 @@ export default function Dashboard({ user }: { user: User | null }) {
     }
     
     // สร้าง Header ของ CSV
-    const headers = ["วันที่", "เวลา", "ประเภท", "หมวดหมู่", "รายการ", "จำนวนเงิน (บาท)"];
+    const headers = ["วันที่", "เวลา", "หมวดหมู่", "รายการ", "จำนวนเงิน (บาท)"];
     
     // สร้างข้อมูล Row
     const rows = transactions.map(t => {
       const dateStr = t.createdAt ? format(parseISO(t.createdAt), "dd/MM/yyyy") : "";
       const timeStr = t.createdAt ? format(parseISO(t.createdAt), "HH:mm") : "";
-      const typeStr = t.type === 'income' ? 'รายรับ' : 'รายจ่าย';
       const catStr = `"${t.category || '-'}"`;
       const note = `"${(t.note || "").replace(/"/g, '""')}"`; // ป้องกันปัญหาลูกน้ำและคำพูดใน CSV
-      const amount = (t.type === 'income' ? t.amount : -t.amount) || 0;
-      return [dateStr, timeStr, typeStr, catStr, note, amount].join(",");
+      const amount = t.amount || 0;
+      return [dateStr, timeStr, catStr, note, amount].join(",");
     });
     
     // ประกอบเนื้อหา CSV และเติม BOM เพื่อให้ Excel เปิดภาษาไทยได้ถูกต้อง
@@ -142,38 +131,29 @@ export default function Dashboard({ user }: { user: User | null }) {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        {/* Net Balance Card */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 p-6 md:p-8 rounded-3xl shadow-xl shadow-gray-900/10 dark:shadow-black/40 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        {/* Total Expense Card */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 to-violet-900 dark:from-indigo-950 dark:to-violet-950 p-6 md:p-8 rounded-3xl shadow-xl shadow-indigo-900/20 dark:shadow-black/40 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           </div>
-          <p className="text-gray-400 dark:text-gray-400 text-sm font-medium mb-1 relative z-10">ยอดคงเหลือ</p>
-          <p className={`text-4xl font-black relative z-10 ${netBalance >= 0 ? 'text-white' : 'text-rose-400'}`}>
-            ฿{netBalance.toLocaleString()}
+          <p className="text-indigo-200 dark:text-indigo-300 text-sm font-medium mb-1 relative z-10">ยอดใช้จ่ายทั้งหมด (ที่แสดง)</p>
+          <p className="text-4xl font-black relative z-10 text-white">
+            ฿{totalAmount.toLocaleString()}
           </p>
         </div>
         
-        {/* Income Card */}
+        {/* Transaction Count Card */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center space-x-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-              <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" transform="rotate(180 12 12)"/></svg>
+            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
             </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">รายรับทั้งหมด</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">จำนวนรายการ</p>
           </div>
-          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">฿{totalIncome.toLocaleString()}</p>
-        </div>
-
-        {/* Expense Card */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
-          <div className="flex items-center space-x-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
-              <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">รายจ่ายทั้งหมด</p>
-          </div>
-          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">฿{totalExpense.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+            {transactions.length} <span className="text-base font-normal text-gray-500 dark:text-gray-400">รายการ</span>
+          </p>
         </div>
       </div>
 
@@ -209,9 +189,8 @@ export default function Dashboard({ user }: { user: User | null }) {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.2} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
-                <Tooltip cursor={{fill: '#f3f4f6'}} formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, ""]} />
-                <Bar dataKey="income" name="รายรับ" fill="#10b981" radius={[4, 4, 0, 0]} stackId="a" />
-                <Bar dataKey="expense" name="รายจ่าย" fill="#ef4444" radius={[4, 4, 0, 0]} stackId="b" />
+                <Tooltip cursor={{fill: '#f3f4f6'}} formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, "ยอดใช้จ่าย"]} />
+                <Bar dataKey="expense" name="รายจ่าย" fill="#6366f1" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -242,7 +221,7 @@ export default function Dashboard({ user }: { user: User | null }) {
                 <div className="flex-1 pr-4">
                   <div className="flex items-center space-x-2 mb-1">
                     {t.category && (
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${t.type === 'income' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
                         {t.category}
                       </span>
                     )}
@@ -255,8 +234,8 @@ export default function Dashboard({ user }: { user: User | null }) {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3 text-right">
-                  <span className={`font-medium whitespace-nowrap ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {t.type === 'income' ? '+' : '-'}฿{t.amount?.toLocaleString()}
+                  <span className="font-medium whitespace-nowrap text-rose-600 dark:text-rose-400">
+                    -฿{t.amount?.toLocaleString()}
                   </span>
                   <button 
                     onClick={() => handleDelete(t.id)}
@@ -298,7 +277,7 @@ export default function Dashboard({ user }: { user: User | null }) {
                     </td>
                     <td className="p-4">
                       {t.category ? (
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${t.type === 'income' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
                           {t.category}
                         </span>
                       ) : (
@@ -308,8 +287,8 @@ export default function Dashboard({ user }: { user: User | null }) {
                     <td className="p-4">
                       <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{t.note}</p>
                     </td>
-                    <td className={`p-4 text-right font-medium ${t.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {t.type === 'income' ? '+' : '-'}฿{t.amount?.toLocaleString()}
+                    <td className="p-4 text-right font-medium text-rose-600 dark:text-rose-400">
+                      -฿{t.amount?.toLocaleString()}
                     </td>
                     <td className="p-4 text-center">
                       <button 

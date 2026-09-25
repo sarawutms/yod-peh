@@ -19,7 +19,6 @@ export default function UploadSlip({ user }: { user: User | null }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   // Form fields
-  const [type, setType] = useState<'expense' | 'income'>('expense');
   const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [note, setNote] = useState<string>("");
@@ -29,7 +28,6 @@ export default function UploadSlip({ user }: { user: User | null }) {
   const [tesseractWorker, setTesseractWorker] = useState<Tesseract.Worker | null>(null);
 
   const EXPENSE_CATEGORIES = ["อาหารและเครื่องดื่ม", "การเดินทาง", "ช้อปปิ้ง", "บิลและค่าใช้จ่าย", "สุขภาพ", "ความบันเทิง", "โอนเงินให้คนอื่น", "อื่นๆ"];
-  const INCOME_CATEGORIES = ["เงินเดือน", "รายได้เสริม", "คนโอนเงินให้", "อื่นๆ"];
 
   // โหลด Worker ล่วงหน้าตอนเปิดแอป
   useEffect(() => {
@@ -145,10 +143,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
       console.error(err);
       setError("เกิดข้อผิดพลาดในการอ่านรูปภาพ (OCR)");
       setOcrStatus("");
-    } finally {
-      setIsProcessing(false);
-    }
-  }, []);
+  }, [tesseractWorker]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
     onDrop,
@@ -201,7 +196,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             note: note.trim(),
             createdAt: today.toISOString(),
             user_id: user.id,
-            type: type,
+            type: 'expense',
             category: category
           }
         ]);
@@ -231,25 +226,8 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
   return (
     <div className="w-full max-w-md mx-auto p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-800 transition-colors">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center tracking-tight">บันทึกรายการ</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center tracking-tight">บันทึกรายการจ่าย</h2>
       
-      <div className="flex bg-gray-100/80 dark:bg-gray-800/80 p-1.5 rounded-2xl mb-6">
-        <button
-          type="button"
-          onClick={() => { setType('expense'); setCategory(""); }}
-          className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${type === 'expense' ? 'bg-white dark:bg-gray-700 text-rose-600 dark:text-rose-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-        >
-          รายจ่าย
-        </button>
-        <button
-          type="button"
-          onClick={() => { setType('income'); setCategory(""); }}
-          className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${type === 'income' ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-        >
-          รายรับ
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Upload Area */}
         <div>
@@ -337,7 +315,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             required
           >
             <option value="" disabled>เลือกหมวดหมู่...</option>
-            {(type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES).map(cat => (
+            {EXPENSE_CATEGORIES.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
@@ -349,7 +327,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
           <input
             type="text"
             id="note"
-            placeholder={type === 'expense' ? "เช่น ชาบู, ค่าไฟ, โอนเงินให้ A" : "เช่น เงินเดือน, ลูกค้าโอนค่าของ"}
+            placeholder="เช่น ชาบู, ค่าไฟ, โอนเงินให้ A"
             className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 font-medium"
             value={note}
             onChange={(e) => setNote(e.target.value)}

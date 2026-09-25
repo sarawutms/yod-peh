@@ -19,10 +19,15 @@ export default function UploadSlip({ user }: { user: User | null }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   // Form fields
+  const [type, setType] = useState<'expense' | 'income'>('expense');
+  const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [note, setNote] = useState<string>("");
   const [transferTime, setTransferTime] = useState<string>(""); // เก็บแค่เวลา HH:mm
   const [ocrStatus, setOcrStatus] = useState<string>("");
+
+  const EXPENSE_CATEGORIES = ["อาหารและเครื่องดื่ม", "การเดินทาง", "ช้อปปิ้ง", "บิลและค่าใช้จ่าย", "สุขภาพ", "ความบันเทิง", "โอนเงินให้คนอื่น", "อื่นๆ"];
+  const INCOME_CATEGORIES = ["เงินเดือน", "รายได้เสริม", "คนโอนเงินให้", "อื่นๆ"];
 
   // ฟังก์ชันดึงยอดเงิน
   const extractAmountFromText = (text: string) => {
@@ -136,6 +141,10 @@ export default function UploadSlip({ user }: { user: User | null }) {
       setError("กรุณากรอกยอดเงินให้ถูกต้อง");
       return;
     }
+    if (!category) {
+      setError("กรุณาเลือกหมวดหมู่");
+      return;
+    }
     if (!note.trim()) {
       setError("กรุณากรอกว่าจ่ายค่าอะไรไป");
       return;
@@ -163,7 +172,9 @@ export default function UploadSlip({ user }: { user: User | null }) {
             amount: Number(amount),
             note: note.trim(),
             createdAt: today.toISOString(),
-            user_id: user.id
+            user_id: user.id,
+            type: type,
+            category: category
           }
         ]);
         
@@ -174,6 +185,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
       setPreviewUrl(null);
       setAmount("");
       setNote("");
+      setCategory("");
       setTransferTime("");
       setOcrStatus("");
 
@@ -191,12 +203,29 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 transition-colors">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 text-center">บันทึกรายการโอนเงิน</h2>
+      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 text-center">บันทึกรายการ</h2>
       
+      <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-lg mb-5">
+        <button
+          type="button"
+          onClick={() => { setType('expense'); setCategory(""); }}
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${type === 'expense' ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+        >
+          รายจ่าย
+        </button>
+        <button
+          type="button"
+          onClick={() => { setType('income'); setCategory(""); }}
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${type === 'income' ? 'bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+        >
+          รายรับ
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Upload Area */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">รูปสลิป</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">รูปสลิป (ไม่บังคับ)</label>
           <div 
             {...getRootProps()} 
             className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
@@ -225,51 +254,71 @@ export default function UploadSlip({ user }: { user: User | null }) {
           </div>
         </div>
 
-        {/* Time Input */}
-        <div>
-          <label htmlFor="transferTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            เวลาที่โอน (ดึงจากรูปภาพ)
-          </label>
-          <input
-            type="time"
-            id="transferTime"
-            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100"
-            value={transferTime}
-            onChange={(e) => setTransferTime(e.target.value)}
-            disabled={isProcessing}
-            required
-          />
-        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Amount Input */}
+          <div>
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              ยอดเงิน
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                id="amount"
+                step="0.01"
+                placeholder="0.00"
+                className={`w-full p-2.5 bg-white dark:bg-gray-900 border rounded-lg outline-none font-semibold text-lg transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-green-400 dark:border-green-500 text-green-700 dark:text-green-400' : 'border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400'}`}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={isProcessing}
+              />
+            </div>
+            {ocrStatus && !ocrStatus.includes('กำลัง') && (
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">{ocrStatus}</p>
+            )}
+          </div>
 
-        {/* Amount Input */}
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            ยอดเงิน (ดึงตัวเลขจากรูปภาพ)
-          </label>
-          <div className="relative">
+          {/* Time Input */}
+          <div>
+            <label htmlFor="transferTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              เวลา
+            </label>
             <input
-              type="number"
-              id="amount"
-              step="0.01"
-              placeholder="0.00"
-              className={`w-full p-2.5 bg-white dark:bg-gray-900 border rounded-lg outline-none font-semibold text-lg transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-green-400 dark:border-green-500 text-green-700 dark:text-green-400' : 'border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400'}`}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              type="time"
+              id="transferTime"
+              className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100"
+              value={transferTime}
+              onChange={(e) => setTransferTime(e.target.value)}
               disabled={isProcessing}
+              required
             />
           </div>
-          {ocrStatus && !ocrStatus.includes('กำลัง') && (
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1">{ocrStatus}</p>
-          )}
+        </div>
+
+        {/* Category Input */}
+        <div>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">หมวดหมู่</label>
+          <select
+            id="category"
+            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={isProcessing}
+            required
+          >
+            <option value="" disabled>เลือกหมวดหมู่...</option>
+            {(type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES).map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
 
         {/* Note Input */}
         <div>
-          <label htmlFor="note" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">จ่ายค่าอะไรไป?</label>
+          <label htmlFor="note" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">รายละเอียดเพิ่มเติม</label>
           <input
             type="text"
             id="note"
-            placeholder="เช่น ค่าอาหาร, ค่าไฟ, โอนเงินให้ A"
+            placeholder={type === 'expense' ? "เช่น ค่าอาหาร, ค่าไฟ, โอนเงินให้ A" : "เช่น เงินเดือนเดือนนี้, ลูกค้าโอนค่าของ"}
             className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-all disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             value={note}
             onChange={(e) => setNote(e.target.value)}

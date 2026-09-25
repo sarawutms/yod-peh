@@ -2,18 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { format, parseISO } from "date-fns";
 import { th } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
 
-export default function Dashboard({ user }: { user: any }) {
+export default function Dashboard({ user }: { user: User | null }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [summaryType, setSummaryType] = useState<'day' | 'week' | 'month'>('day');
 
   const fetchTransactions = async () => {
-    if (!supabase) return;
+    if (!supabase || !user) {
+      setLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('transactions')
@@ -67,7 +72,7 @@ export default function Dashboard({ user }: { user: any }) {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">กำลังโหลดข้อมูลสรุป...</div>;
+    return <div className="p-8 text-center text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูลสรุป...</div>;
   }
 
   const totalAmount = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
@@ -99,35 +104,35 @@ export default function Dashboard({ user }: { user: any }) {
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <p className="text-gray-500 text-sm font-medium mb-1">ยอดใช้จ่ายทั้งหมด (ที่แสดง)</p>
-          <p className="text-3xl font-bold text-blue-600">฿{totalAmount.toLocaleString()}</p>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center transition-colors">
+          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">ยอดใช้จ่ายทั้งหมด (ที่แสดง)</p>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">฿{totalAmount.toLocaleString()}</p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-center">
-          <p className="text-gray-500 text-sm font-medium mb-1">จำนวนรายการ</p>
-          <p className="text-3xl font-bold text-gray-800">{transactions.length} <span className="text-base font-normal text-gray-500">รายการ</span></p>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center transition-colors">
+          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">จำนวนรายการ</p>
+          <p className="text-3xl font-bold text-gray-800 dark:text-gray-100">{transactions.length} <span className="text-base font-normal text-gray-500 dark:text-gray-400">รายการ</span></p>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 transition-colors">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-          <h3 className="text-lg font-semibold text-gray-800">กราฟสรุปยอดใช้จ่าย</h3>
-          <div className="flex bg-gray-100 p-1 rounded-lg">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">กราฟสรุปยอดใช้จ่าย</h3>
+          <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-lg">
             <button 
               onClick={() => setSummaryType('day')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'day' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'day' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
             >
               รายวัน
             </button>
             <button 
               onClick={() => setSummaryType('week')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'week' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'week' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
             >
               รายสัปดาห์
             </button>
             <button 
               onClick={() => setSummaryType('month')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'month' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
             >
               รายเดือน
             </button>
@@ -138,9 +143,9 @@ export default function Dashboard({ user }: { user: any }) {
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.2} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
                 <Tooltip cursor={{fill: '#f3f4f6'}} />
                 <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -151,12 +156,12 @@ export default function Dashboard({ user }: { user: any }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <h3 className="text-lg font-semibold p-6 pb-4 border-b border-gray-50 text-gray-800">รายการใช้จ่ายล่าสุด</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
+        <h3 className="text-lg font-semibold p-6 pb-4 border-b border-gray-50 dark:border-gray-700/50 text-gray-800 dark:text-gray-100">รายการใช้จ่ายล่าสุด</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 text-gray-500 text-sm">
+              <tr className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm">
                 <th className="p-4 font-medium">วันที่</th>
                 <th className="p-4 font-medium">เวลา</th>
                 <th className="p-4 font-medium">รายการ (จ่ายค่าอะไร)</th>
@@ -167,23 +172,23 @@ export default function Dashboard({ user }: { user: any }) {
             <tbody>
               {transactions.length > 0 ? (
                 transactions.map((t) => (
-                  <tr key={t.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50">
-                    <td className="p-4 text-sm text-gray-600">
+                  <tr key={t.id} className="border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                    <td className="p-4 text-sm text-gray-600 dark:text-gray-400">
                       {t.createdAt ? format(parseISO(t.createdAt), "dd MMM yy", { locale: th }) : "-"}
                     </td>
-                    <td className="p-4 text-sm text-gray-500">
+                    <td className="p-4 text-sm text-gray-500 dark:text-gray-500">
                       {t.createdAt ? format(parseISO(t.createdAt), "HH:mm", { locale: th }) : "-"}
                     </td>
                     <td className="p-4">
-                      <p className="text-sm font-medium text-gray-800">{t.note}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{t.note}</p>
                     </td>
-                    <td className="p-4 text-right font-medium text-red-600">
+                    <td className="p-4 text-right font-medium text-red-600 dark:text-red-400">
                       -฿{t.amount?.toLocaleString()}
                     </td>
                     <td className="p-4 text-center">
                       <button 
                         onClick={() => handleDelete(t.id)}
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                         title="ลบรายการ"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -193,7 +198,7 @@ export default function Dashboard({ user }: { user: any }) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">ยังไม่มีรายการ</td>
+                  <td colSpan={5} className="p-8 text-center text-gray-400 dark:text-gray-500">ยังไม่มีรายการ</td>
                 </tr>
               )}
             </tbody>

@@ -40,6 +40,7 @@ export default function Dashboard({ user }: { user: User | null }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTransactions();
 
     const subscription = supabase
@@ -192,6 +193,7 @@ export default function Dashboard({ user }: { user: User | null }) {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.2} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <Tooltip cursor={{fill: '#f3f4f6'}} formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, "ยอดใช้จ่าย"]} />
                 <Bar dataKey="expense" name="รายจ่าย" fill="#6366f1" radius={[4, 4, 0, 0]} />
               </BarChart>

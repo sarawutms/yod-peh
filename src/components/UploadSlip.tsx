@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import Tesseract from "tesseract.js";
 import { Loader2, CheckCircle, XCircle, Image as ImageIcon } from "lucide-react";
@@ -25,9 +25,32 @@ export default function UploadSlip({ user }: { user: User | null }) {
   const [note, setNote] = useState<string>("");
   const [transferTime, setTransferTime] = useState<string>(""); // เก็บแค่เวลา HH:mm
   const [ocrStatus, setOcrStatus] = useState<string>("");
+  // เก็บ Worker ไว้ใช้ซ้ำเพื่อไม่ต้องโหลดใหม่ทุกครั้ง
+  const [tesseractWorker, setTesseractWorker] = useState<Tesseract.Worker | null>(null);
 
   const EXPENSE_CATEGORIES = ["อาหารและเครื่องดื่ม", "การเดินทาง", "ช้อปปิ้ง", "บิลและค่าใช้จ่าย", "สุขภาพ", "ความบันเทิง", "โอนเงินให้คนอื่น", "อื่นๆ"];
   const INCOME_CATEGORIES = ["เงินเดือน", "รายได้เสริม", "คนโอนเงินให้", "อื่นๆ"];
+
+  // โหลด Worker ล่วงหน้าตอนเปิดแอป
+  useEffect(() => {
+    const loadWorker = async () => {
+      try {
+        const worker = await Tesseract.createWorker('tha+eng');
+        setTesseractWorker(worker);
+      } catch (e) {
+        console.error("Failed to load worker", e);
+      }
+    };
+    if (!tesseractWorker) {
+      loadWorker();
+    }
+    
+    return () => {
+      if (tesseractWorker) {
+        tesseractWorker.terminate();
+      }
+    };
+  }, []);
 
   // ฟังก์ชันดึงยอดเงิน
   const extractAmountFromText = (text: string) => {
@@ -83,17 +106,22 @@ export default function UploadSlip({ user }: { user: User | null }) {
       const compressedFile = await imageCompression(selectedFile, options);
 
       setOcrStatus("กำลังอ่านตัวหนังสือบนสลิป (OCR)...");
-      const result = await Tesseract.recognize(
-        compressedFile,
-        'tha+eng',
-        { logger: m => {
-          if (m.status === 'recognizing text') {
-            setOcrStatus(`กำลังอ่านตัวหนังสือ... ${Math.round(m.progress * 100)}%`);
-          }
-        }}
-      );
-
-      const text = result.data.text;
+      let text = "";
+      if (tesseractWorker) {
+        const result = await tesseractWorker.recognize(compressedFile);
+        text = result.data.text;
+      } else {
+        const result = await Tesseract.recognize(
+          compressedFile,
+          'tha+eng',
+          { logger: m => {
+            if (m.status === 'recognizing text') {
+              setOcrStatus(`กำลังอ่านตัวหนังสือ... ${Math.round(m.progress * 100)}%`);
+            }
+          }}
+        );
+        text = result.data.text;
+      }
       
       const extractedAmount = extractAmountFromText(text);
       const extractedTime = extractTimeFromText(text);

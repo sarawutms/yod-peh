@@ -141,28 +141,46 @@ export default function Dashboard({ user }: { user: User | null }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center transition-colors">
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">ยอดคงเหลือ</p>
-          <p className={`text-3xl font-bold ${netBalance >= 0 ? 'text-gray-800 dark:text-gray-100' : 'text-red-600 dark:text-red-400'}`}>
+    <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        {/* Net Balance Card */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 p-6 md:p-8 rounded-3xl shadow-xl shadow-gray-900/10 dark:shadow-black/40 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <p className="text-gray-400 dark:text-gray-400 text-sm font-medium mb-1 relative z-10">ยอดคงเหลือ</p>
+          <p className={`text-4xl font-black relative z-10 ${netBalance >= 0 ? 'text-white' : 'text-rose-400'}`}>
             ฿{netBalance.toLocaleString()}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center transition-colors">
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">รายรับทั้งหมด</p>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400">฿{totalIncome.toLocaleString()}</p>
+        
+        {/* Income Card */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+              <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" transform="rotate(180 12 12)"/></svg>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">รายรับทั้งหมด</p>
+          </div>
+          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">฿{totalIncome.toLocaleString()}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-center transition-colors">
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">รายจ่ายทั้งหมด</p>
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400">฿{totalExpense.toLocaleString()}</p>
+
+        {/* Expense Card */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+              <svg className="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">รายจ่ายทั้งหมด</p>
+          </div>
+          <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">฿{totalExpense.toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 transition-colors">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 mb-8 transition-colors">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">กราฟสรุปยอดใช้จ่าย</h3>
-          <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-lg">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">กราฟสรุปยอดใช้จ่าย</h3>
+          <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-1.5 rounded-2xl">
             <button 
               onClick={() => setSummaryType('day')}
               className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'day' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}

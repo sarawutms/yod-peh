@@ -58,43 +58,42 @@ export default function Home() {
         </div>
       )}
 
-      <header className="bg-white dark:bg-gray-800 py-5 px-6 mb-8 shadow-sm border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10 transition-colors">
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl py-4 px-6 mb-8 shadow-[0_4px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgb(0,0,0,0.1)] border-b border-gray-100 dark:border-gray-800/50 sticky top-0 z-10 transition-colors">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3 cursor-default">
-            <div className="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2 rounded-xl shadow-sm text-white">
+          <div className="flex items-center space-x-3 cursor-default group">
+            <div className="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-2xl shadow-lg shadow-indigo-500/20 text-white transform transition-transform group-hover:scale-105">
               <ReceiptText className="w-6 h-6" />
             </div>
             <h1 className="text-2xl font-black tracking-tight flex items-baseline">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Yod</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">Yod</span>
               <span className="text-gray-800 dark:text-gray-100">Peh</span>
-              <span className="ml-3 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-100 dark:border-emerald-800 tracking-wide uppercase flex items-center hidden sm:flex">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
+              <span className="ml-3 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-100/50 dark:border-emerald-800/50 tracking-wider uppercase flex items-center hidden sm:flex shadow-sm">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
                 ยอดเป๊ะ
               </span>
             </h1>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <ThemeToggle />
             
             {session ? (
-              <>
-                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium max-w-[120px] sm:max-w-[200px] truncate block">
+              <div className="flex items-center bg-gray-50 dark:bg-gray-800/80 p-1.5 rounded-full border border-gray-100 dark:border-gray-700/50 shadow-sm">
+                <span className="text-sm text-gray-700 dark:text-gray-200 font-medium max-w-[100px] sm:max-w-[150px] truncate px-3">
                   {session.user.user_metadata?.display_name || session.user.email?.split('@')[0]}
                 </span>
                 <button 
                   onClick={handleLogout} 
-                  className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex items-center text-sm font-medium transition-colors bg-gray-50 dark:bg-gray-800/50 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 sm:px-3 py-1.5 rounded-lg"
+                  className="text-gray-500 dark:text-gray-400 hover:text-white dark:hover:text-white hover:bg-rose-500 dark:hover:bg-rose-500 flex items-center justify-center p-2 rounded-full transition-all duration-200"
                   title="ออกจากระบบ"
                 >
-                  <LogOut className="w-4 h-4 sm:mr-1.5" />
-                  <span className="hidden sm:inline">ออกจากระบบ</span>
+                  <LogOut className="w-4 h-4" />
                 </button>
-              </>
+              </div>
             ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="text-blue-600 dark:text-blue-400 text-sm font-medium px-4 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium px-5 py-2.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
               >
                 เข้าสู่ระบบ
               </button>

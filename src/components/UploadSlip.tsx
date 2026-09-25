@@ -202,62 +202,65 @@ export default function UploadSlip({ user }: { user: User | null }) {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 transition-colors">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100 text-center">บันทึกรายการ</h2>
+    <div className="w-full max-w-md mx-auto p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-800 transition-colors">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center tracking-tight">บันทึกรายการ</h2>
       
-      <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-lg mb-5">
+      <div className="flex bg-gray-100/80 dark:bg-gray-800/80 p-1.5 rounded-2xl mb-6">
         <button
           type="button"
           onClick={() => { setType('expense'); setCategory(""); }}
-          className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${type === 'expense' ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+          className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${type === 'expense' ? 'bg-white dark:bg-gray-700 text-rose-600 dark:text-rose-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
         >
           รายจ่าย
         </button>
         <button
           type="button"
           onClick={() => { setType('income'); setCategory(""); }}
-          className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${type === 'income' ? 'bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+          className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${type === 'income' ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
         >
           รายรับ
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Upload Area */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">รูปสลิป (ไม่บังคับ)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">รูปสลิป (ไม่บังคับ)</label>
           <div 
             {...getRootProps()} 
-            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-              isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 ${
+              isDragActive ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20" : "border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
             }`}
           >
             <input {...getInputProps()} />
             {previewUrl ? (
               <div className="relative w-full h-40">
-                <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded" />
+                <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded-xl" />
                 {isProcessing && (
-                  <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex flex-col items-center justify-center rounded">
-                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-400 text-center px-4">{ocrStatus}</p>
+                  <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl">
+                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-3" />
+                    <p className="text-sm font-medium text-indigo-700 dark:text-indigo-400 text-center px-4">{ocrStatus}</p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center space-y-2 py-4">
-                <ImageIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {isDragActive ? "วางรูปสลิปที่นี่..." : "ลากรูปสลิปมาวาง หรือคลิกเพื่อเลือกไฟล์"}
+              <div className="flex flex-col items-center justify-center space-y-3 py-4">
+                <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-1">
+                  <ImageIcon className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+                </div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {isDragActive ? "วางรูปสลิปที่นี่..." : "แตะเพื่อถ่ายรูป หรือเลือกไฟล์"}
                 </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">รองรับระบบดึงตัวเลขจากสลิปอัตโนมัติ</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-5">
           {/* Amount Input */}
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               ยอดเงิน
             </label>
             <div className="relative">
@@ -266,26 +269,26 @@ export default function UploadSlip({ user }: { user: User | null }) {
                 id="amount"
                 step="0.01"
                 placeholder="0.00"
-                className={`w-full p-2.5 bg-white dark:bg-gray-900 border rounded-lg outline-none font-semibold text-lg transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-green-400 dark:border-green-500 text-green-700 dark:text-green-400' : 'border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400'}`}
+                className={`w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border rounded-2xl outline-none font-bold text-xl transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 ring-4 ring-emerald-50 dark:ring-emerald-900/20' : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400'}`}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 disabled={isProcessing}
               />
             </div>
             {ocrStatus && !ocrStatus.includes('กำลัง') && (
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1">{ocrStatus}</p>
+              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-2">{ocrStatus}</p>
             )}
           </div>
 
           {/* Time Input */}
           <div>
-            <label htmlFor="transferTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="transferTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               เวลา
             </label>
             <input
               type="time"
               id="transferTime"
-              className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100"
+              className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-lg"
               value={transferTime}
               onChange={(e) => setTransferTime(e.target.value)}
               disabled={isProcessing}
@@ -296,10 +299,10 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
         {/* Category Input */}
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">หมวดหมู่</label>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">หมวดหมู่</label>
           <select
             id="category"
-            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 font-medium"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             disabled={isProcessing}
@@ -314,12 +317,12 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
         {/* Note Input */}
         <div>
-          <label htmlFor="note" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">รายละเอียดเพิ่มเติม</label>
+          <label htmlFor="note" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">รายละเอียดเพิ่มเติม</label>
           <input
             type="text"
             id="note"
-            placeholder={type === 'expense' ? "เช่น ค่าอาหาร, ค่าไฟ, โอนเงินให้ A" : "เช่น เงินเดือนเดือนนี้, ลูกค้าโอนค่าของ"}
-            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-all disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+            placeholder={type === 'expense' ? "เช่น ชาบู, ค่าไฟ, โอนเงินให้ A" : "เช่น เงินเดือน, ลูกค้าโอนค่าของ"}
+            className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 font-medium"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             disabled={isProcessing}
@@ -327,15 +330,15 @@ export default function UploadSlip({ user }: { user: User | null }) {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg flex items-center text-sm border border-red-100 dark:border-red-900/50">
-            <XCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl flex items-center text-sm font-medium border border-red-100 dark:border-red-900/30">
+            <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
             {error}
           </div>
         )}
 
         {isSuccess && (
-          <div className="p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg flex items-center text-sm border border-green-100 dark:border-green-900/50">
-            <CheckCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-2xl flex items-center text-sm font-medium border border-emerald-100 dark:border-emerald-900/30">
+            <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0" />
             บันทึกรายการสำเร็จ!
           </div>
         )}
@@ -343,9 +346,9 @@ export default function UploadSlip({ user }: { user: User | null }) {
         <button
           type="submit"
           disabled={isSubmitting || isProcessing}
-          className={`w-full py-3 rounded-lg text-white font-medium flex justify-center items-center text-lg shadow-sm ${
-            (isSubmitting || isProcessing) ? "bg-gray-400 dark:bg-gray-700 cursor-not-allowed text-gray-100 dark:text-gray-300" : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
-          } transition-colors`}
+          className={`w-full py-4 rounded-2xl text-white font-bold flex justify-center items-center text-lg shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] ${
+            (isSubmitting || isProcessing) ? "bg-gray-400 dark:bg-gray-700 cursor-not-allowed text-gray-100 shadow-none" : "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-500/25"
+          }`}
         >
           {isSubmitting ? (
             <>

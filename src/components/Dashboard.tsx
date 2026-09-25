@@ -158,7 +158,40 @@ export default function Dashboard({ user }: { user: User | null }) {
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
         <h3 className="text-lg font-semibold p-6 pb-4 border-b border-gray-50 dark:border-gray-700/50 text-gray-800 dark:text-gray-100">รายการใช้จ่ายล่าสุด</h3>
-        <div className="overflow-x-auto">
+        {/* Mobile View (Card List) */}
+        <div className="block md:hidden">
+          {transactions.length > 0 ? (
+            transactions.map((t) => (
+              <div key={t.id} className="p-4 border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors flex justify-between items-center">
+                <div className="flex-1 pr-4">
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2">{t.note}</p>
+                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1 space-x-2">
+                    <span>{t.createdAt ? format(parseISO(t.createdAt), "dd MMM yy", { locale: th }) : "-"}</span>
+                    <span>•</span>
+                    <span>{t.createdAt ? format(parseISO(t.createdAt), "HH:mm", { locale: th }) : "-"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 text-right">
+                  <span className="font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
+                    -฿{t.amount?.toLocaleString()}
+                  </span>
+                  <button 
+                    onClick={() => handleDelete(t.id)}
+                    className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title="ลบรายการ"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-8 text-center text-gray-400 dark:text-gray-500 text-sm">ยังไม่มีรายการ</div>
+          )}
+        </div>
+
+        {/* Desktop View (Table) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm">

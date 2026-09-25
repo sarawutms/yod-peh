@@ -79,15 +79,16 @@ export default function Home() {
             
             {session ? (
               <>
-                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium hidden sm:inline-block">
-                  สวัสดี, {session.user.user_metadata?.display_name || session.user.email}
+                <span className="text-sm text-gray-600 dark:text-gray-300 font-medium max-w-[120px] sm:max-w-[200px] truncate block">
+                  {session.user.user_metadata?.display_name || session.user.email?.split('@')[0]}
                 </span>
                 <button 
                   onClick={handleLogout} 
-                  className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex items-center text-sm font-medium transition-colors bg-gray-50 dark:bg-gray-800/50 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1.5 rounded-lg"
+                  className="text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 flex items-center text-sm font-medium transition-colors bg-gray-50 dark:bg-gray-800/50 hover:bg-red-50 dark:hover:bg-red-900/30 px-2 sm:px-3 py-1.5 rounded-lg"
+                  title="ออกจากระบบ"
                 >
-                  <LogOut className="w-4 h-4 mr-1.5" />
-                  ออกจากระบบ
+                  <LogOut className="w-4 h-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">ออกจากระบบ</span>
                 </button>
               </>
             ) : (

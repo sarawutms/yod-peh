@@ -15,6 +15,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "YodPeh | ยอดเป๊ะ",
   description: "ระบบบันทึกรายการโอนเงินและสรุปผลอย่างแม่นยำ (ยอดเป๊ะ)",
+  manifest: "/manifest.json",
+  themeColor: "#ffffff",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "ยอดเป๊ะ",
+  },
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";

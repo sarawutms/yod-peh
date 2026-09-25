@@ -1,0 +1,21 @@
+{
+  "name": "Yod Peh - ยอดเป๊ะ",
+  "short_name": "ยอดเป๊ะ",
+  "description": "แอปจดบันทึกรายรับรายจ่ายแบบเป๊ะๆ ดึงข้อมูลสลิปด้วย AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/file.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/window.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

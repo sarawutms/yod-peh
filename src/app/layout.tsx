@@ -12,7 +12,17 @@ export const metadata: Metadata = {
   title: "YodPeh | ยอดเป๊ะ",
   description: "ระบบบันทึกรายการโอนเงินและสรุปผลอย่างแม่นยำ (ยอดเป๊ะ)",
   manifest: "/manifest.json",
-  themeColor: "#ffffff",
+  themeColor: "#4f46e5",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" }
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ]
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

@@ -228,7 +228,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-800 transition-colors">
+    <div className="w-full max-w-md mx-auto p-5 md:p-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-800 transition-colors">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 text-center tracking-tight">บันทึกรายการจ่าย</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">

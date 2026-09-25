@@ -52,7 +52,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 transition-colors">
+    <div className="w-full max-w-md mx-auto p-6 sm:p-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border border-gray-100 dark:border-gray-800 transition-colors">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
           {isLogin ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}

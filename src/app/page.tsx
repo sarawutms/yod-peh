@@ -58,7 +58,7 @@ export default function Home() {
         </div>
       )}
 
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl py-4 px-6 mb-8 shadow-[0_4px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgb(0,0,0,0.1)] border-b border-gray-100 dark:border-gray-800/50 sticky top-0 z-10 transition-colors">
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-2xl py-4 px-4 sm:px-6 mb-4 sm:mb-8 shadow-[0_4px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgb(0,0,0,0.1)] border-b border-gray-100 dark:border-gray-800/50 sticky top-0 z-10 transition-colors">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3 cursor-default group">
             <div className="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2.5 rounded-2xl shadow-lg shadow-indigo-500/20 text-white transform transition-transform group-hover:scale-105">
@@ -102,7 +102,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8">
         <div className="relative">
           {/* Click Interceptor Overlay for Unauthenticated Users */}
           {!session && (

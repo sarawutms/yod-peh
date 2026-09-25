@@ -137,7 +137,7 @@ export default function Dashboard({ user }: { user: User | null }) {
     <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
         {/* Total Expense Card */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 to-violet-900 dark:from-indigo-950 dark:to-violet-950 p-6 md:p-8 rounded-3xl shadow-xl shadow-indigo-900/20 dark:shadow-black/40 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 to-violet-900 dark:from-indigo-950 dark:to-violet-950 p-5 md:p-8 rounded-3xl shadow-xl shadow-indigo-900/20 dark:shadow-black/40 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           </div>
@@ -148,7 +148,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         </div>
         
         {/* Transaction Count Card */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-5 md:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center space-x-2 mb-2">
             <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
               <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
@@ -161,7 +161,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         </div>
       </div>
 
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 mb-8 transition-colors">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 mb-6 sm:mb-8 transition-colors">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
           <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">กราฟสรุปยอดใช้จ่าย</h3>
           <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-1.5 rounded-2xl">
@@ -205,7 +205,7 @@ export default function Dashboard({ user }: { user: User | null }) {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
-        <div className="p-6 pb-4 border-b border-gray-50 dark:border-gray-700/50 flex justify-between items-center">
+        <div className="p-4 sm:p-6 pb-4 sm:pb-4 border-b border-gray-50 dark:border-gray-700/50 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">รายการใช้จ่ายล่าสุด ({transactions.length})</h3>
           <button 
             onClick={exportToCSV}

@@ -112,7 +112,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
     onDrop,
     accept: { "image/*": [] },
     multiple: false,
-    disabled: !user || isProcessing
+    disabled: isProcessing
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,7 +192,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             {...getRootProps()} 
             className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
               isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-            } ${!user ? "opacity-50 cursor-not-allowed" : ""}`}
+            }`}
           >
             <input {...getInputProps()} />
             {previewUrl ? (
@@ -227,7 +227,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100"
             value={transferTime}
             onChange={(e) => setTransferTime(e.target.value)}
-            disabled={!user || isProcessing}
+            disabled={isProcessing}
             required
           />
         </div>
@@ -246,7 +246,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
               className={`w-full p-2.5 bg-white dark:bg-gray-900 border rounded-lg outline-none font-semibold text-lg transition-colors disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-green-400 dark:border-green-500 text-green-700 dark:text-green-400' : 'border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400'}`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              disabled={!user || isProcessing}
+              disabled={isProcessing}
             />
           </div>
           {ocrStatus && !ocrStatus.includes('กำลัง') && (
@@ -264,7 +264,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none transition-all disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            disabled={!user || isProcessing}
+            disabled={isProcessing}
           />
         </div>
 
@@ -284,9 +284,9 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
         <button
           type="submit"
-          disabled={!user || isSubmitting || isProcessing}
+          disabled={isSubmitting || isProcessing}
           className={`w-full py-3 rounded-lg text-white font-medium flex justify-center items-center text-lg shadow-sm ${
-            (!user || isSubmitting || isProcessing) ? "bg-gray-400 dark:bg-gray-700 cursor-not-allowed text-gray-100 dark:text-gray-300" : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
+            (isSubmitting || isProcessing) ? "bg-gray-400 dark:bg-gray-700 cursor-not-allowed text-gray-100 dark:text-gray-300" : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
           } transition-colors`}
         >
           {isSubmitting ? (
@@ -294,8 +294,6 @@ export default function UploadSlip({ user }: { user: User | null }) {
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               กำลังบันทึก...
             </>
-          ) : !user ? (
-            "กรุณาเข้าสู่ระบบก่อน"
           ) : (
             "บันทึกรายการ"
           )}

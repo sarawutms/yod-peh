@@ -143,6 +143,9 @@ export default function UploadSlip({ user }: { user: User | null }) {
       console.error(err);
       setError("เกิดข้อผิดพลาดในการอ่านรูปภาพ (OCR)");
       setOcrStatus("");
+    } finally {
+      setIsProcessing(false);
+    }
   }, [tesseractWorker]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 

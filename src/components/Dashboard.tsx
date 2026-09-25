@@ -72,6 +72,9 @@ export default function Dashboard({ user }: { user: User | null }) {
   };
 
   if (loading) {
+    return <div className="p-8 text-center text-gray-500 dark:text-gray-400">กำลังโหลดข้อมูลสรุป...</div>;
+  }
+
   const totalAmount = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
 
   // เตรียมข้อมูลสำหรับกราฟ (แสดงเฉพาะรายจ่าย)

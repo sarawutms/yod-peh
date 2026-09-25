@@ -101,6 +101,38 @@ export default function Dashboard({ user }: { user: User | null }) {
     amount: chartDataMap[key]
   })).reverse(); // เรียงจากเก่าไปใหม่สำหรับกราฟ
 
+  const exportToCSV = () => {
+    if (transactions.length === 0) {
+      alert("ไม่มีข้อมูลสำหรับส่งออก");
+      return;
+    }
+    
+    // สร้าง Header ของ CSV
+    const headers = ["วันที่", "เวลา", "รายการ", "จำนวนเงิน (บาท)"];
+    
+    // สร้างข้อมูล Row
+    const rows = transactions.map(t => {
+      const dateStr = t.createdAt ? format(parseISO(t.createdAt), "dd/MM/yyyy") : "";
+      const timeStr = t.createdAt ? format(parseISO(t.createdAt), "HH:mm") : "";
+      const note = `"${(t.note || "").replace(/"/g, '""')}"`; // ป้องกันปัญหาลูกน้ำและคำพูดใน CSV
+      const amount = t.amount || 0;
+      return [dateStr, timeStr, note, amount].join(",");
+    });
+    
+    // ประกอบเนื้อหา CSV และเติม BOM เพื่อให้ Excel เปิดภาษาไทยได้ถูกต้อง
+    const csvContent = "\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
+    
+    // สร้างและโหลดไฟล์
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `yod-peh-export-${format(new Date(), "yyyyMMdd")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -157,7 +189,19 @@ export default function Dashboard({ user }: { user: User | null }) {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
-        <h3 className="text-lg font-semibold p-6 pb-4 border-b border-gray-50 dark:border-gray-700/50 text-gray-800 dark:text-gray-100">รายการใช้จ่ายล่าสุด</h3>
+        <div className="p-6 pb-4 border-b border-gray-50 dark:border-gray-700/50 flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">รายการใช้จ่ายล่าสุด</h3>
+          <button 
+            onClick={exportToCSV}
+            disabled={transactions.length === 0}
+            className="text-sm px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md font-medium transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export CSV
+          </button>
+        </div>
         {/* Mobile View (Card List) */}
         <div className="block md:hidden">
           {transactions.length > 0 ? (

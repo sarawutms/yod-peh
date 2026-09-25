@@ -7,6 +7,8 @@ import { Loader2, CheckCircle, XCircle, Image as ImageIcon } from "lucide-react"
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 
+import imageCompression from "browser-image-compression";
+
 export default function UploadSlip({ user }: { user: User | null }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,9 +69,17 @@ export default function UploadSlip({ user }: { user: User | null }) {
     setIsProcessing(true);
 
     try {
+      setOcrStatus("กำลังบีบอัดรูปภาพเพื่อความรวดเร็ว...");
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(selectedFile, options);
+
       setOcrStatus("กำลังอ่านตัวหนังสือบนสลิป (OCR)...");
       const result = await Tesseract.recognize(
-        selectedFile,
+        compressedFile,
         'tha+eng',
         { logger: m => {
           if (m.status === 'recognizing text') {
@@ -79,7 +89,6 @@ export default function UploadSlip({ user }: { user: User | null }) {
       );
 
       const text = result.data.text;
-      console.log("OCR Text Result: ", text); // พิมพ์ค่าที่อ่านได้ให้ดูใน Console
       
       const extractedAmount = extractAmountFromText(text);
       const extractedTime = extractTimeFromText(text);

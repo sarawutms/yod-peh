@@ -64,13 +64,24 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
   // ฟังก์ชันดึงเวลา (HH:mm)
   const extractTimeFromText = (text: string) => {
-    // หาแพทเทิร์นเวลา HH:mm หรือ HH.mm (เผื่อ OCR อ่าน : เป็น . หรือเว้นวรรค)
-    const regex = /\b([01]?[0-9]|2[0-3])\s*[:\.]\s*([0-5][0-9])\b/;
+    // หาแพทเทิร์นเวลา HH:mm หรือ HH.mm (เผื่อ OCR อ่าน : เป็น . หรือเว้นวรรค) พร้อมรองรับ am/pm
+    const regex = /\b([01]?[0-9]|2[0-3])\s*[:\.]\s*([0-5][0-9])\s*(am|pm|a\.m\.|p\.m\.)?(?!\w)/i;
     const match = text.match(regex);
     if (match) {
-      const hh = match[1].padStart(2, '0');
-      const mm = match[2];
-      return `${hh}:${mm}`;
+      let hhStr = match[1];
+      let mm = match[2];
+      let period = match[3] ? match[3].toLowerCase().replace(/\./g, '') : '';
+
+      let hh = parseInt(hhStr, 10);
+      
+      if (period === 'pm' && hh < 12) {
+        hh += 12;
+      } else if (period === 'am' && hh === 12) {
+        hh = 0;
+      }
+
+      const hhFormatted = String(hh).padStart(2, '0');
+      return `${hhFormatted}:${mm}`;
     }
     return "";
   };

@@ -8,6 +8,27 @@ import { format, parseISO } from "date-fns";
 import { th } from "date-fns/locale";
 import { Trash2, Edit2, Check, X } from "lucide-react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/50 transform transition-all">
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{label}</p>
+        <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
+          ฿{Number(payload[0].value).toLocaleString()}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const formatYAxis = (tickItem: number) => {
+  if (tickItem >= 1000000) return `${(tickItem / 1000000).toFixed(1)}M`;
+  if (tickItem >= 1000) return `${(tickItem / 1000).toFixed(0)}k`;
+  return tickItem.toString();
+};
+
 export default function Dashboard({ user }: { user: User | null }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -243,13 +264,26 @@ export default function Dashboard({ user }: { user: User | null }) {
         <div className="h-64 w-full">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.2} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <Tooltip cursor={{fill: '#f3f4f6'}} formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, "ยอดใช้จ่าย"]} />
-                <Bar dataKey="expense" name="รายจ่าย" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <BarChart data={chartData} margin={{ top: 20, right: 10, left: -10, bottom: 10 }}>
+                <defs>
+                  <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.2}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.1} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 12}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 12}} tickFormatter={formatYAxis} />
+                <Tooltip content={<CustomTooltip />} cursor={{fill: '#8b5cf6', opacity: 0.05}} />
+                <Bar 
+                  dataKey="expense" 
+                  name="รายจ่าย" 
+                  fill="url(#colorExpense)" 
+                  radius={[6, 6, 0, 0]} 
+                  maxBarSize={60} 
+                  animationDuration={1200}
+                  animationEasing="ease-out"
+                />
               </BarChart>
             </ResponsiveContainer>
           ) : (

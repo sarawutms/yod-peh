@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isToday, isThisWeek, isThisMonth, isThisYear } from "date-fns";
 import { th } from "date-fns/locale";
-import { Trash2, Edit2, Check, X } from "lucide-react";
+import { Trash2, Edit2, Check, X, Calendar, CalendarDays, CalendarRange, TrendingUp, Layers } from "lucide-react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -70,7 +70,7 @@ export default function Dashboard({ user }: { user: User | null }) {
     }
   };
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     if (!supabase || !user) {
       setLoading(false);
       return;
@@ -81,7 +81,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         .select('*')
         .eq('user_id', user.id)
         .order('createdAt', { ascending: false })
-        .limit(200);
+        .limit(1000);
 
       if (error) {
         console.error("Error fetching data:", error);
@@ -93,11 +93,12 @@ export default function Dashboard({ user }: { user: User | null }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTransactions();
+
+    if (!supabase) return;
 
     const subscription = supabase
       .channel('public:transactions')
@@ -109,7 +110,7 @@ export default function Dashboard({ user }: { user: User | null }) {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [fetchTransactions]);
 
   const handleDelete = async (id: string) => {
     if (window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) {
@@ -133,6 +134,44 @@ export default function Dashboard({ user }: { user: User | null }) {
   }
 
   const totalAmount = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+
+  // คำนวณยอดแยก รายวัน, รายสัปดาห์, รายเดือน, รายปี
+  const periodStats = transactions.reduce(
+    (acc, t) => {
+      if (!t.createdAt) return acc;
+      try {
+        const date = parseISO(t.createdAt);
+        if (isNaN(date.getTime())) return acc;
+        const amt = Number(t.amount) || 0;
+
+        if (isToday(date)) {
+          acc.day.total += amt;
+          acc.day.count += 1;
+        }
+        if (isThisWeek(date, { weekStartsOn: 1 })) {
+          acc.week.total += amt;
+          acc.week.count += 1;
+        }
+        if (isThisMonth(date)) {
+          acc.month.total += amt;
+          acc.month.count += 1;
+        }
+        if (isThisYear(date)) {
+          acc.year.total += amt;
+          acc.year.count += 1;
+        }
+      } catch {
+        // ignore date parse errors
+      }
+      return acc;
+    },
+    {
+      day: { total: 0, count: 0 },
+      week: { total: 0, count: 0 },
+      month: { total: 0, count: 0 },
+      year: { total: 0, count: 0 },
+    }
+  );
 
   // เตรียมข้อมูลสำหรับกราฟ (แสดงเฉพาะรายจ่าย)
   const chartDataMap = transactions.reduce((acc, t) => {
@@ -204,30 +243,189 @@ export default function Dashboard({ user }: { user: User | null }) {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-        {/* Total Expense Card */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 to-violet-900 dark:from-indigo-950 dark:to-violet-950 p-5 md:p-8 rounded-3xl shadow-xl shadow-indigo-900/20 dark:shadow-black/40 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          </div>
-          <p className="text-indigo-200 dark:text-indigo-300 text-sm font-medium mb-1 relative z-10">ยอดใช้จ่ายทั้งหมด (ที่แสดง)</p>
-          <p className="text-4xl font-black relative z-10 text-white">
-            ฿{totalAmount.toLocaleString()}
+      {/* ส่วนหัวสรุปภาพรวม */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-black text-gray-800 dark:text-gray-100 tracking-tight flex items-center space-x-2">
+            <span>สรุปยอดใช้จ่าย</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            แตะที่กรอบเพื่อสลับการแสดงผลกราฟตามช่วงเวลา
           </p>
         </div>
-        
-        {/* Transaction Count Card */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-5 md:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-center transition-all duration-300 hover:-translate-y-1">
-          <div className="flex items-center space-x-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        <div className="inline-flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl px-4 py-2 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm self-start sm:self-auto">
+          <Layers className="w-4 h-4 text-indigo-500" />
+          <span className="text-xs text-gray-500 dark:text-gray-400">ยอดรวมทั้งหมด:</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-100">฿{totalAmount.toLocaleString()}</span>
+          <span className="text-xs text-gray-400">({transactions.length} รายการ)</span>
+        </div>
+      </div>
+
+      {/* กรอบแสดงยอด รายวัน / รายสัปดาห์ / รายเดือน / รายปี แยกกัน 4 กรอบ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        {/* กรอบรายวัน */}
+        <button
+          type="button"
+          onClick={() => setSummaryType('day')}
+          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+            summaryType === 'day'
+              ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-500 dark:ring-blue-400 -translate-y-0.5'
+              : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-blue-200 dark:hover:border-blue-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
+          }`}
+        >
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              summaryType === 'day'
+                ? 'bg-white/20 text-white'
+                : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+            }`}>
+              รายวัน
+            </span>
+            <div className={`p-2 rounded-xl ${
+              summaryType === 'day'
+                ? 'bg-white/20 text-white'
+                : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+            }`}>
+              <Calendar className="w-4 h-4" />
             </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">จำนวนรายการ</p>
           </div>
-          <p className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-            {transactions.length} <span className="text-base font-normal text-gray-500 dark:text-gray-400">รายการ</span>
-          </p>
-        </div>
+          <div>
+            <p className={`text-xs mb-1 ${summaryType === 'day' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>
+              วันนี้ ({format(new Date(), "d MMM", { locale: th })})
+            </p>
+            <p className={`text-xl sm:text-2xl font-black tracking-tight truncate ${
+              summaryType === 'day' ? 'text-white' : 'text-gray-800 dark:text-gray-100'
+            }`} title={`฿${periodStats.day.total.toLocaleString()}`}>
+              ฿{periodStats.day.total.toLocaleString()}
+            </p>
+            <p className={`text-[11px] mt-1.5 ${summaryType === 'day' ? 'text-blue-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
+              {periodStats.day.count} รายการ
+            </p>
+          </div>
+        </button>
+
+        {/* กรอบรายสัปดาห์ */}
+        <button
+          type="button"
+          onClick={() => setSummaryType('week')}
+          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+            summaryType === 'week'
+              ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-violet-500 dark:ring-violet-400 -translate-y-0.5'
+              : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-violet-200 dark:hover:border-violet-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
+          }`}
+        >
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              summaryType === 'week'
+                ? 'bg-white/20 text-white'
+                : 'bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+            }`}>
+              รายสัปดาห์
+            </span>
+            <div className={`p-2 rounded-xl ${
+              summaryType === 'week'
+                ? 'bg-white/20 text-white'
+                : 'bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+            }`}>
+              <CalendarDays className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className={`text-xs mb-1 ${summaryType === 'week' ? 'text-violet-100' : 'text-gray-500 dark:text-gray-400'}`}>
+              สัปดาห์นี้
+            </p>
+            <p className={`text-xl sm:text-2xl font-black tracking-tight truncate ${
+              summaryType === 'week' ? 'text-white' : 'text-gray-800 dark:text-gray-100'
+            }`} title={`฿${periodStats.week.total.toLocaleString()}`}>
+              ฿{periodStats.week.total.toLocaleString()}
+            </p>
+            <p className={`text-[11px] mt-1.5 ${summaryType === 'week' ? 'text-violet-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
+              {periodStats.week.count} รายการ
+            </p>
+          </div>
+        </button>
+
+        {/* กรอบรายเดือน */}
+        <button
+          type="button"
+          onClick={() => setSummaryType('month')}
+          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+            summaryType === 'month'
+              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500 dark:ring-emerald-400 -translate-y-0.5'
+              : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-emerald-200 dark:hover:border-emerald-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
+          }`}
+        >
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              summaryType === 'month'
+                ? 'bg-white/20 text-white'
+                : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+            }`}>
+              รายเดือน
+            </span>
+            <div className={`p-2 rounded-xl ${
+              summaryType === 'month'
+                ? 'bg-white/20 text-white'
+                : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+            }`}>
+              <CalendarRange className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className={`text-xs mb-1 ${summaryType === 'month' ? 'text-emerald-100' : 'text-gray-500 dark:text-gray-400'}`}>
+              {format(new Date(), "MMMM yyyy", { locale: th })}
+            </p>
+            <p className={`text-xl sm:text-2xl font-black tracking-tight truncate ${
+              summaryType === 'month' ? 'text-white' : 'text-gray-800 dark:text-gray-100'
+            }`} title={`฿${periodStats.month.total.toLocaleString()}`}>
+              ฿{periodStats.month.total.toLocaleString()}
+            </p>
+            <p className={`text-[11px] mt-1.5 ${summaryType === 'month' ? 'text-emerald-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
+              {periodStats.month.count} รายการ
+            </p>
+          </div>
+        </button>
+
+        {/* กรอบรายปี */}
+        <button
+          type="button"
+          onClick={() => setSummaryType('year')}
+          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+            summaryType === 'year'
+              ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 ring-2 ring-amber-500 dark:ring-amber-400 -translate-y-0.5'
+              : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-amber-200 dark:hover:border-amber-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
+          }`}
+        >
+          <div className="flex items-center justify-between w-full mb-3">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              summaryType === 'year'
+                ? 'bg-white/20 text-white'
+                : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+            }`}>
+              รายปี
+            </span>
+            <div className={`p-2 rounded-xl ${
+              summaryType === 'year'
+                ? 'bg-white/20 text-white'
+                : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
+            }`}>
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <p className={`text-xs mb-1 ${summaryType === 'year' ? 'text-amber-100' : 'text-gray-500 dark:text-gray-400'}`}>
+              ปี {new Date().getFullYear()} ({new Date().getFullYear() + 543})
+            </p>
+            <p className={`text-xl sm:text-2xl font-black tracking-tight truncate ${
+              summaryType === 'year' ? 'text-white' : 'text-gray-800 dark:text-gray-100'
+            }`} title={`฿${periodStats.year.total.toLocaleString()}`}>
+              ฿{periodStats.year.total.toLocaleString()}
+            </p>
+            <p className={`text-[11px] mt-1.5 ${summaryType === 'year' ? 'text-amber-100/80' : 'text-gray-400 dark:text-gray-500'}`}>
+              {periodStats.year.count} รายการ
+            </p>
+          </div>
+        </button>
       </div>
 
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 mb-6 sm:mb-8 transition-colors">

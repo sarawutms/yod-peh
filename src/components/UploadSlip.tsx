@@ -68,9 +68,9 @@ export default function UploadSlip({ user }: { user: User | null }) {
     const regex = /\b([01]?[0-9]|2[0-3])\s*[:\.]\s*([0-5][0-9])\s*(am|pm|a\.m\.|p\.m\.)?(?!\w)/i;
     const match = text.match(regex);
     if (match) {
-      let hhStr = match[1];
-      let mm = match[2];
-      let period = match[3] ? match[3].toLowerCase().replace(/\./g, '') : '';
+      const hhStr = match[1];
+      const mm = match[2];
+      const period = match[3] ? match[3].toLowerCase().replace(/\./g, '') : '';
 
       let hh = parseInt(hhStr, 10);
       

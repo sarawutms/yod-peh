@@ -3,10 +3,52 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { format, parseISO, isToday, isSameDay, isSameWeek, isSameMonth, isSameYear, subDays, addDays, subMonths, addMonths, subYears, addYears } from "date-fns";
 import { th } from "date-fns/locale";
-import { Trash2, Edit2, Check, X, Calendar, CalendarDays, CalendarRange, TrendingUp, Layers, ChevronLeft, ChevronRight, RotateCcw, Filter } from "lucide-react";
+import { Trash2, Edit2, Check, X, Calendar, CalendarDays, CalendarRange, TrendingUp, Layers, ChevronLeft, ChevronRight, RotateCcw, Filter, PieChart as PieChartIcon } from "lucide-react";
+
+const CATEGORY_COLORS: Record<string, string> = {
+  "อาหารและเครื่องดื่ม": "#f59e0b",
+  "การเดินทาง": "#0ea5e9",
+  "ช้อปปิ้ง": "#f43f5e",
+  "บิลและค่าใช้จ่าย": "#6366f1",
+  "สุขภาพ": "#10b981",
+  "ความบันเทิง": "#a855f7",
+  "โอนเงินให้คนอื่น": "#06b6d4",
+  "อื่นๆ": "#64748b",
+};
+
+const FALLBACK_COLORS = [
+  "#6366f1", "#ec4899", "#f59e0b", "#10b981", 
+  "#06b6d4", "#8b5cf6", "#f97316", "#14b8a6"
+];
+
+const getCategoryColor = (category: string, index: number) => {
+  return CATEGORY_COLORS[category] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CategoryTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/50">
+        <div className="flex items-center space-x-2 mb-1">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: data.color }} />
+          <p className="text-xs font-semibold text-gray-700 dark:text-gray-200">{data.name}</p>
+        </div>
+        <p className="text-base font-black text-gray-900 dark:text-white">
+          ฿{Number(data.value).toLocaleString()}
+        </p>
+        <p className="text-[11px] text-gray-500 dark:text-gray-400">
+          {data.percentage}% • {data.count} รายการ
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -38,6 +80,7 @@ export default function Dashboard({ user }: { user: User | null }) {
   // Period navigation states
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [filterByPeriod, setFilterByPeriod] = useState(false);
+  const [categoryTimeScope, setCategoryTimeScope] = useState<'period' | 'all'>('period');
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -225,6 +268,51 @@ export default function Dashboard({ user }: { user: User | null }) {
   }, {} as Record<string, { name: string, expense: number }>);
 
   const chartData = Object.values(chartDataMap).reverse(); // เรียงจากเก่าไปใหม่สำหรับกราฟ
+
+  // คำนวณสัดส่วนค่าใช้จ่ายตามหมวดหมู่ (Category Donut Chart)
+  const categorySourceTransactions = categoryTimeScope === 'all'
+    ? transactions
+    : transactions.filter((t) => {
+        if (!t.createdAt) return false;
+        try {
+          const d = parseISO(t.createdAt);
+          if (isNaN(d.getTime())) return false;
+          if (summaryType === 'day') return isSameDay(d, selectedDate);
+          if (summaryType === 'week') return isSameWeek(d, selectedDate, { weekStartsOn: 1 });
+          if (summaryType === 'month') return isSameMonth(d, selectedDate);
+          if (summaryType === 'year') return isSameYear(d, selectedDate);
+        } catch {
+          return false;
+        }
+        return false;
+      });
+
+  const categoryTotalAmount = categorySourceTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+
+  interface CategoryStat {
+    name: string;
+    value: number;
+    count: number;
+  }
+
+  const categoryMap = categorySourceTransactions.reduce<Record<string, CategoryStat>>((acc, t) => {
+    const cat = t.category || "อื่นๆ";
+    const amt = Number(t.amount) || 0;
+    if (!acc[cat]) {
+      acc[cat] = { name: cat, value: 0, count: 0 };
+    }
+    acc[cat].value += amt;
+    acc[cat].count += 1;
+    return acc;
+  }, {});
+
+  const categoryChartData = (Object.values(categoryMap) as CategoryStat[])
+    .sort((a, b) => b.value - a.value)
+    .map((item, idx) => ({
+      ...item,
+      percentage: categoryTotalAmount > 0 ? ((item.value / categoryTotalAmount) * 100).toFixed(1) : "0",
+      color: getCategoryColor(item.name, idx),
+    }));
 
   const exportToCSV = () => {
     if (transactions.length === 0) {
@@ -526,64 +614,170 @@ export default function Dashboard({ user }: { user: User | null }) {
         </button>
       </div>
 
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 mb-6 sm:mb-8 transition-colors">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">กราฟสรุปยอดใช้จ่าย</h3>
-          <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-1.5 rounded-2xl">
-            <button 
-              onClick={() => setSummaryType('day')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'day' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-            >
-              รายวัน
-            </button>
-            <button 
-              onClick={() => setSummaryType('week')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'week' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-            >
-              รายสัปดาห์
-            </button>
-            <button 
-              onClick={() => setSummaryType('month')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'month' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-            >
-              รายเดือน
-            </button>
-            <button 
-              onClick={() => setSummaryType('year')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${summaryType === 'year' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-            >
-              รายปี
-            </button>
+      {/* Charts Grid: Timeline Bar Chart + Category Donut Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6 sm:mb-8">
+        {/* Timeline Bar Chart */}
+        <div className="lg:col-span-7 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-between transition-colors">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 space-y-3 sm:space-y-0">
+            <div>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 tracking-tight">กราฟสรุปยอดใช้จ่าย</h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500">แนวโน้มการใช้จ่ายตามช่วงเวลา</p>
+            </div>
+            <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-1 rounded-2xl self-stretch sm:self-auto justify-between sm:justify-start">
+              <button 
+                onClick={() => setSummaryType('day')}
+                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'day' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+              >
+                รายวัน
+              </button>
+              <button 
+                onClick={() => setSummaryType('week')}
+                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'week' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+              >
+                รายสัปดาห์
+              </button>
+              <button 
+                onClick={() => setSummaryType('month')}
+                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'month' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+              >
+                รายเดือน
+              </button>
+              <button 
+                onClick={() => setSummaryType('year')}
+                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'year' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+              >
+                รายปี
+              </button>
+            </div>
+          </div>
+          
+          <div className="h-60 w-full">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 20, right: 10, left: -10, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.2}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.1} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 11}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 11}} tickFormatter={formatYAxis} />
+                  <Tooltip content={<CustomTooltip />} cursor={{fill: '#8b5cf6', opacity: 0.05}} />
+                  <Bar 
+                    dataKey="expense" 
+                    name="รายจ่าย" 
+                    fill="url(#colorExpense)" 
+                    radius={[6, 6, 0, 0]} 
+                    maxBarSize={45} 
+                    animationDuration={1200}
+                    animationEasing="ease-out"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-400">ยังไม่มีข้อมูล</div>
+            )}
           </div>
         </div>
-        
-        <div className="h-64 w-full">
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 10, left: -10, bottom: 10 }}>
-                <defs>
-                  <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.2}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" strokeOpacity={0.1} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af', fontSize: 12}} tickFormatter={formatYAxis} />
-                <Tooltip content={<CustomTooltip />} cursor={{fill: '#8b5cf6', opacity: 0.05}} />
-                <Bar 
-                  dataKey="expense" 
-                  name="รายจ่าย" 
-                  fill="url(#colorExpense)" 
-                  radius={[6, 6, 0, 0]} 
-                  maxBarSize={60} 
-                  animationDuration={1200}
-                  animationEasing="ease-out"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+
+        {/* Category Donut Chart */}
+        <div className="lg:col-span-5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-between transition-colors">
+          <div className="flex justify-between items-center mb-3">
+            <div>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 tracking-tight flex items-center space-x-1.5">
+                <PieChartIcon className="w-4 h-4 text-indigo-500" />
+                <span>สัดส่วนตามหมวดหมู่</span>
+              </h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                {categoryTimeScope === 'period' ? 'อิงตามช่วงเวลาที่กำลังดู' : 'รวมทุกช่วงเวลา'}
+              </p>
+            </div>
+            <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-0.5 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setCategoryTimeScope('period')}
+                className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${categoryTimeScope === 'period' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400'}`}
+              >
+                ช่วงนี้
+              </button>
+              <button
+                type="button"
+                onClick={() => setCategoryTimeScope('all')}
+                className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${categoryTimeScope === 'all' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400'}`}
+              >
+                ทั้งหมด
+              </button>
+            </div>
+          </div>
+
+          {categoryChartData.length > 0 ? (
+            <>
+              {/* Donut Chart with Center Total */}
+              <div className="relative h-44 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Tooltip content={<CategoryTooltip />} />
+                    <Pie
+                      data={categoryChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={48}
+                      outerRadius={70}
+                      paddingAngle={3}
+                      cornerRadius={4}
+                      animationDuration={1000}
+                    >
+                      {categoryChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500">ยอดรวม</span>
+                  <span className="text-xs sm:text-sm font-black text-gray-800 dark:text-gray-100 truncate max-w-[85px]">
+                    ฿{categoryTotalAmount >= 100000 ? `${(categoryTotalAmount / 1000).toFixed(0)}k` : categoryTotalAmount.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Category Breakdown List */}
+              <div className="space-y-1.5 mt-2 max-h-36 overflow-y-auto pr-1">
+                {categoryChartData.map((cat) => (
+                  <div key={cat.name} className="flex items-center justify-between text-xs py-1 px-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                      <span className="font-medium text-gray-700 dark:text-gray-200 truncate max-w-[120px]">{cat.name}</span>
+                      <span className="text-gray-400 text-[10px]">({cat.count})</span>
+                    </div>
+                    <div className="text-right flex items-center space-x-2 flex-shrink-0">
+                      <span className="font-bold text-gray-800 dark:text-gray-200">฿{cat.value.toLocaleString()}</span>
+                      <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/60 px-1.5 py-0.5 rounded-md min-w-[36px] text-center">
+                        {cat.percentage}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-400">ยังไม่มีข้อมูล</div>
+            <div className="h-56 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-xs">
+              <PieChartIcon className="w-8 h-8 mb-2 opacity-30 text-indigo-400" />
+              <span>ยังไม่มีรายการใน{categoryTimeScope === 'period' ? 'ช่วงเวลานี้' : 'ระบบ'}</span>
+              {categoryTimeScope === 'period' && (
+                <button
+                  type="button"
+                  onClick={() => setCategoryTimeScope('all')}
+                  className="mt-2 text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                >
+                  คลิกเพื่อดูสัดส่วนทั้งหมด
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

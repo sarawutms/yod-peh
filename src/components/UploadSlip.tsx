@@ -22,6 +22,13 @@ export default function UploadSlip({ user }: { user: User | null }) {
   const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [note, setNote] = useState<string>("");
+  const [transferDate, setTransferDate] = useState<string>(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  });
   const [transferTime, setTransferTime] = useState<string>(""); // เก็บแค่เวลา HH:mm
   const [ocrStatus, setOcrStatus] = useState<string>("");
   // เก็บ Worker ไว้ใช้ซ้ำเพื่อไม่ต้องโหลดใหม่ทุกครั้ง
@@ -196,10 +203,10 @@ export default function UploadSlip({ user }: { user: User | null }) {
     setIsSuccess(false);
 
     try {
-      // เอาวันที่ของวันนี้ มารวมกับเวลาที่เลือก
-      const today = new Date();
-      const [hours, minutes] = transferTime.split(':');
-      today.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      // เอาวันที่และเวลาที่เลือกรวมกัน
+      const [year, month, day] = transferDate.split('-').map(Number);
+      const [hours, minutes] = transferTime.split(':').map(Number);
+      const transactionDate = new Date(year, month - 1, day, hours || 0, minutes || 0, 0);
 
       // บันทึกข้อมูลลง Supabase
       const { error: dbError } = await supabase
@@ -208,7 +215,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
           {
             amount: Number(amount),
             note: note.trim(),
-            createdAt: today.toISOString(),
+            createdAt: transactionDate.toISOString(),
             user_id: user.id,
             type: 'expense',
             category: category
@@ -277,30 +284,45 @@ export default function UploadSlip({ user }: { user: User | null }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-5">
-          {/* Amount Input */}
-          <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              ยอดเงิน
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                id="amount"
-                step="0.01"
-                placeholder="0.00"
-                className={`w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border rounded-2xl outline-none font-bold text-xl transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 ring-4 ring-emerald-50 dark:ring-emerald-900/20' : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400'}`}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                disabled={isProcessing}
-              />
-            </div>
-            {ocrStatus && !ocrStatus.includes('กำลัง') && (
-              <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-2">{ocrStatus}</p>
-            )}
+        {/* Amount Input */}
+        <div>
+          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            ยอดเงิน (บาท)
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              id="amount"
+              step="0.01"
+              placeholder="0.00"
+              className={`w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border rounded-2xl outline-none font-bold text-2xl transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 ring-4 ring-emerald-50 dark:ring-emerald-900/20' : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400'}`}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              disabled={isProcessing}
+              required
+            />
           </div>
+          {ocrStatus && !ocrStatus.includes('กำลัง') && (
+            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-2">{ocrStatus}</p>
+          )}
+        </div>
 
-          {/* Time Input */}
+        {/* Date and Time Inputs */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="transferDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              วันที่
+            </label>
+            <input
+              type="date"
+              id="transferDate"
+              className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
+              value={transferDate}
+              onChange={(e) => setTransferDate(e.target.value)}
+              disabled={isProcessing}
+              required
+            />
+          </div>
           <div>
             <label htmlFor="transferTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               เวลา
@@ -308,7 +330,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             <input
               type="time"
               id="transferTime"
-              className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-lg"
+              className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
               value={transferTime}
               onChange={(e) => setTransferTime(e.target.value)}
               disabled={isProcessing}

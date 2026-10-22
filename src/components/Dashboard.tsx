@@ -453,7 +453,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         <button
           type="button"
           onClick={() => setSummaryType('day')}
-          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+          className={`text-left p-4 sm:p-5 rounded-3xl min-h-[160px] transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
             summaryType === 'day'
               ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-500 dark:ring-blue-400 -translate-y-0.5'
               : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-blue-200 dark:hover:border-blue-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
@@ -494,7 +494,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         <button
           type="button"
           onClick={() => setSummaryType('week')}
-          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+          className={`text-left p-4 sm:p-5 rounded-3xl min-h-[160px] transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
             summaryType === 'week'
               ? 'bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/25 ring-2 ring-violet-500 dark:ring-violet-400 -translate-y-0.5'
               : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-violet-200 dark:hover:border-violet-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
@@ -535,7 +535,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         <button
           type="button"
           onClick={() => setSummaryType('month')}
-          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+          className={`text-left p-4 sm:p-5 rounded-3xl min-h-[160px] transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
             summaryType === 'month'
               ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500 dark:ring-emerald-400 -translate-y-0.5'
               : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-emerald-200 dark:hover:border-emerald-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
@@ -576,7 +576,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         <button
           type="button"
           onClick={() => setSummaryType('year')}
-          className={`text-left p-4 sm:p-5 rounded-3xl transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
+          className={`text-left p-4 sm:p-5 rounded-3xl min-h-[160px] transition-all duration-200 relative overflow-hidden flex flex-col justify-between group cursor-pointer ${
             summaryType === 'year'
               ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 ring-2 ring-amber-500 dark:ring-amber-400 -translate-y-0.5'
               : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 hover:border-amber-200 dark:hover:border-amber-800/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.1)] hover:-translate-y-0.5'
@@ -792,12 +792,12 @@ export default function Dashboard({ user }: { user: User | null }) {
               placeholder="ค้นหารายการ..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-800 dark:text-gray-200"
+              className="h-9 px-3 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-800 dark:text-gray-200"
             />
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-800 dark:text-gray-200"
+              className="h-9 px-3 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md outline-none focus:ring-2 focus:ring-blue-500/50 text-gray-800 dark:text-gray-200"
             >
               <option value="all">ทุกหมวดหมู่</option>
               {uniqueCategories.map(cat => (
@@ -806,7 +806,7 @@ export default function Dashboard({ user }: { user: User | null }) {
             </select>
             <button
               onClick={() => setFilterByPeriod(!filterByPeriod)}
-              className={`text-sm px-3 py-1.5 rounded-md font-medium transition-colors flex items-center justify-center border ${
+              className={`h-9 text-sm px-3 rounded-md font-medium transition-colors flex items-center justify-center border ${
                 filterByPeriod
                   ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
                   : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -819,7 +819,7 @@ export default function Dashboard({ user }: { user: User | null }) {
             <button 
               onClick={exportToCSV}
               disabled={filteredTransactions.length === 0}
-              className="text-sm px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md font-medium transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 text-sm px-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md font-medium transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

@@ -295,7 +295,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
               id="amount"
               step="0.01"
               placeholder="0.00"
-              className={`w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border rounded-2xl outline-none font-bold text-2xl transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 ring-4 ring-emerald-50 dark:ring-emerald-900/20' : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400'}`}
+              className={`w-full h-14 px-3.5 bg-gray-50/50 dark:bg-gray-800/50 border rounded-2xl outline-none font-bold text-2xl transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 ${ocrStatus.includes('สำเร็จ') ? 'border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 ring-4 ring-emerald-50 dark:ring-emerald-900/20' : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400'}`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               disabled={isProcessing}
@@ -316,7 +316,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             <input
               type="date"
               id="transferDate"
-              className="w-full px-3.5 py-3 sm:p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
+              className="w-full h-14 px-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
               value={transferDate}
               onChange={(e) => setTransferDate(e.target.value)}
               disabled={isProcessing}
@@ -330,7 +330,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             <input
               type="time"
               id="transferTime"
-              className="w-full px-3.5 py-3 sm:p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
+              className="w-full h-14 px-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
               value={transferTime}
               onChange={(e) => setTransferTime(e.target.value)}
               disabled={isProcessing}
@@ -344,7 +344,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">หมวดหมู่</label>
           <select
             id="category"
-            className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 font-medium"
+            className="w-full h-14 px-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-gray-800 font-medium"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             disabled={isProcessing}
@@ -364,7 +364,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             type="text"
             id="note"
             placeholder="เช่น ชาบู, ค่าไฟ, โอนเงินให้ A"
-            className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 font-medium"
+            className="w-full h-14 px-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 font-medium"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             disabled={isProcessing}

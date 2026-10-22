@@ -45,8 +45,8 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 pb-12 font-sans transition-colors relative">
       {/* Auth Modal */}
       {showAuthModal && !session && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-          <div className="relative w-full max-w-md animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity overflow-y-auto">
+          <div className="relative w-full max-w-md my-auto animate-in fade-in zoom-in duration-200">
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 rounded-full transition-colors"

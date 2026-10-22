@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
 
@@ -8,11 +8,16 @@ const prompt = Prompt({
   variable: "--font-prompt",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#4f46e5",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "YodPeh | ยอดเป๊ะ",
   description: "ระบบบันทึกรายการโอนเงินและสรุปผลอย่างแม่นยำ (ยอดเป๊ะ)",
   manifest: "/manifest.json",
-  themeColor: "#4f46e5",
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },

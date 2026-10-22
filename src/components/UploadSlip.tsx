@@ -308,29 +308,29 @@ export default function UploadSlip({ user }: { user: User | null }) {
         </div>
 
         {/* Date and Time Inputs */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+          <div className="min-w-0">
             <label htmlFor="transferDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               วันที่
             </label>
             <input
               type="date"
               id="transferDate"
-              className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
+              className="w-full px-3.5 py-3 sm:p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
               value={transferDate}
               onChange={(e) => setTransferDate(e.target.value)}
               disabled={isProcessing}
               required
             />
           </div>
-          <div>
+          <div className="min-w-0">
             <label htmlFor="transferTime" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               เวลา
             </label>
             <input
               type="time"
               id="transferTime"
-              className="w-full p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
+              className="w-full px-3.5 py-3 sm:p-3.5 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400 dark:disabled:text-gray-500 text-gray-900 dark:text-gray-100 font-medium text-sm"
               value={transferTime}
               onChange={(e) => setTransferTime(e.target.value)}
               disabled={isProcessing}

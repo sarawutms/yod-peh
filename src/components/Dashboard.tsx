@@ -396,7 +396,7 @@ export default function Dashboard({ user }: { user: User | null }) {
             </button>
 
             {/* ช่องแสดง/เลือกวันที่ */}
-            <div className="relative flex items-center px-2">
+            <div className="relative flex items-center px-2 overflow-hidden">
               <input
                 type="date"
                 value={format(selectedDate, "yyyy-MM-dd")}
@@ -626,25 +626,25 @@ export default function Dashboard({ user }: { user: User | null }) {
             <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-1 rounded-2xl self-stretch sm:self-auto justify-between sm:justify-start">
               <button 
                 onClick={() => setSummaryType('day')}
-                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'day' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-1 text-[11px] sm:text-xs font-medium rounded-xl transition-colors whitespace-nowrap text-center ${summaryType === 'day' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
               >
                 รายวัน
               </button>
               <button 
                 onClick={() => setSummaryType('week')}
-                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'week' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-1 text-[11px] sm:text-xs font-medium rounded-xl transition-colors whitespace-nowrap text-center ${summaryType === 'week' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
               >
                 รายสัปดาห์
               </button>
               <button 
                 onClick={() => setSummaryType('month')}
-                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'month' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-1 text-[11px] sm:text-xs font-medium rounded-xl transition-colors whitespace-nowrap text-center ${summaryType === 'month' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
               >
                 รายเดือน
               </button>
               <button 
                 onClick={() => setSummaryType('year')}
-                className={`px-3 py-1 text-xs font-medium rounded-xl transition-colors ${summaryType === 'year' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
+                className={`flex-1 sm:flex-initial px-2 sm:px-3 py-1.5 sm:py-1 text-[11px] sm:text-xs font-medium rounded-xl transition-colors whitespace-nowrap text-center ${summaryType === 'year' ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
               >
                 รายปี
               </button>
@@ -684,28 +684,28 @@ export default function Dashboard({ user }: { user: User | null }) {
 
         {/* Category Donut Chart */}
         <div className="lg:col-span-5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-gray-100 dark:border-gray-700/50 flex flex-col justify-between transition-colors">
-          <div className="flex justify-between items-center mb-3">
-            <div>
-              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 tracking-tight flex items-center space-x-1.5">
-                <PieChartIcon className="w-4 h-4 text-indigo-500" />
-                <span>สัดส่วนตามหมวดหมู่</span>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 tracking-tight flex items-center space-x-1.5 truncate">
+                <PieChartIcon className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                <span className="truncate">สัดส่วนตามหมวดหมู่</span>
               </h3>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
                 {categoryTimeScope === 'period' ? 'อิงตามช่วงเวลาที่กำลังดู' : 'รวมทุกช่วงเวลา'}
               </p>
             </div>
-            <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-0.5 rounded-xl">
+            <div className="flex bg-gray-100/80 dark:bg-gray-900/80 p-0.5 rounded-xl flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setCategoryTimeScope('period')}
-                className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${categoryTimeScope === 'period' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400'}`}
+                className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors whitespace-nowrap ${categoryTimeScope === 'period' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400'}`}
               >
                 ช่วงนี้
               </button>
               <button
                 type="button"
                 onClick={() => setCategoryTimeScope('all')}
-                className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors ${categoryTimeScope === 'all' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400'}`}
+                className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors whitespace-nowrap ${categoryTimeScope === 'all' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400'}`}
               >
                 ทั้งหมด
               </button>
@@ -870,7 +870,7 @@ export default function Dashboard({ user }: { user: User | null }) {
                   </div>
                 ) : (
                   <>
-                    <div className="flex-1 pr-4">
+                    <div className="flex-1 min-w-0 pr-3 sm:pr-4">
                       <div className="flex items-center space-x-2 mb-1">
                         {t.category && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">

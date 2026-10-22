@@ -15,7 +15,6 @@ export default function UploadSlip({ user }: { user: User | null }) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   // Form fields
@@ -38,21 +37,21 @@ export default function UploadSlip({ user }: { user: User | null }) {
 
   // โหลด Worker ล่วงหน้าตอนเปิดแอป
   useEffect(() => {
+    let workerInstance: Tesseract.Worker | null = null;
     const loadWorker = async () => {
       try {
         const worker = await Tesseract.createWorker('tha+eng');
+        workerInstance = worker;
         setTesseractWorker(worker);
       } catch (e) {
         console.error("Failed to load worker", e);
       }
     };
-    if (!tesseractWorker) {
-      loadWorker();
-    }
+    loadWorker();
     
     return () => {
-      if (tesseractWorker) {
-        tesseractWorker.terminate();
+      if (workerInstance) {
+        workerInstance.terminate();
       }
     };
   }, []);
@@ -97,8 +96,10 @@ export default function UploadSlip({ user }: { user: User | null }) {
     const selectedFile = acceptedFiles[0];
     if (!selectedFile) return;
 
-    setFile(selectedFile);
-    setPreviewUrl(URL.createObjectURL(selectedFile));
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(selectedFile);
+    });
     setIsSuccess(false);
     setError(null);
     setAmount("");
@@ -185,6 +186,10 @@ export default function UploadSlip({ user }: { user: User | null }) {
       setError("กรุณากรอกยอดเงินให้ถูกต้อง");
       return;
     }
+    if (!transferDate) {
+      setError("กรุณาเลือกวันที่ทำรายการ");
+      return;
+    }
     if (!category) {
       setError("กรุณาเลือกหมวดหมู่");
       return;
@@ -205,8 +210,14 @@ export default function UploadSlip({ user }: { user: User | null }) {
     try {
       // เอาวันที่และเวลาที่เลือกรวมกัน
       const [year, month, day] = transferDate.split('-').map(Number);
-      const [hours, minutes] = transferTime.split(':').map(Number);
+      const [hours, minutes] = (transferTime || "00:00").split(':').map(Number);
       const transactionDate = new Date(year, month - 1, day, hours || 0, minutes || 0, 0);
+
+      if (isNaN(transactionDate.getTime())) {
+        setError("วันที่หรือเวลาไม่ถูกต้อง กรุณาเลือกใหม่อีกครั้ง");
+        setIsSubmitting(false);
+        return;
+      }
 
       // บันทึกข้อมูลลง Supabase
       const { error: dbError } = await supabase
@@ -225,8 +236,10 @@ export default function UploadSlip({ user }: { user: User | null }) {
       if (dbError) throw dbError;
 
       setIsSuccess(true);
-      setFile(null);
-      setPreviewUrl(null);
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
       setAmount("");
       setNote("");
       setCategory("");
@@ -262,6 +275,7 @@ export default function UploadSlip({ user }: { user: User | null }) {
             <input {...getInputProps()} />
             {previewUrl ? (
               <div className="relative w-full h-40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewUrl} alt="Preview" className="w-full h-full object-contain rounded-xl" />
                 {isProcessing && (
                   <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl">

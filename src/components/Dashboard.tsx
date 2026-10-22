@@ -121,6 +121,14 @@ export default function Dashboard({ user }: { user: User | null }) {
   };
 
   const handleUpdate = async (id: string) => {
+    if (!editForm.amount || isNaN(Number(editForm.amount)) || Number(editForm.amount) <= 0) {
+      alert("กรุณากรอกจำนวนเงินให้ถูกต้อง");
+      return;
+    }
+    if (!editForm.note.trim()) {
+      alert("กรุณากรอกรายละเอียดรายการ");
+      return;
+    }
     try {
       if (!supabase) return;
       const { error } = await supabase
@@ -128,7 +136,7 @@ export default function Dashboard({ user }: { user: User | null }) {
         .update({
           amount: Number(editForm.amount),
           category: editForm.category,
-          note: editForm.note
+          note: editForm.note.trim()
         })
         .eq('id', id);
         
@@ -193,6 +201,7 @@ export default function Dashboard({ user }: { user: User | null }) {
           .eq('id', id);
           
         if (error) throw error;
+        fetchTransactions();
       } catch (error) {
         console.error("Error deleting document: ", error);
         alert("เกิดข้อผิดพลาดในการลบรายการ");
@@ -247,22 +256,27 @@ export default function Dashboard({ user }: { user: User | null }) {
   // เตรียมข้อมูลสำหรับกราฟ (แสดงเฉพาะรายจ่าย)
   const chartDataMap = transactions.reduce((acc, t) => {
     if (!t.createdAt) return acc;
-    const date = parseISO(t.createdAt);
-    let keyStr = "";
-    
-    if (summaryType === 'day') {
-      keyStr = format(date, "dd MMM", { locale: th });
-    } else if (summaryType === 'week') {
-      keyStr = `สัปดาห์ที่ ${format(date, "w", { locale: th })}`;
-    } else if (summaryType === 'month') {
-      keyStr = format(date, "MMM yy", { locale: th });
-    } else if (summaryType === 'year') {
-      // ใช้ ปี ค.ศ. หรือจะบวก 543 เป็น พ.ศ. ก็ได้ (ที่นี่ใช้ ค.ศ. ตามมาตรฐาน Date-fns ก่อน)
-      keyStr = format(date, "yyyy", { locale: th });
-    }
+    try {
+      const date = parseISO(t.createdAt);
+      if (isNaN(date.getTime())) return acc;
+      let keyStr = "";
+      
+      if (summaryType === 'day') {
+        keyStr = format(date, "dd MMM", { locale: th });
+      } else if (summaryType === 'week') {
+        keyStr = `สัปดาห์ที่ ${format(date, "w", { locale: th })}`;
+      } else if (summaryType === 'month') {
+        keyStr = format(date, "MMM yy", { locale: th });
+      } else if (summaryType === 'year') {
+        // ใช้ ปี ค.ศ. หรือจะบวก 543 เป็น พ.ศ. ก็ได้ (ที่นี่ใช้ ค.ศ. ตามมาตรฐาน Date-fns ก่อน)
+        keyStr = format(date, "yyyy", { locale: th });
+      }
 
-    if (!acc[keyStr]) acc[keyStr] = { name: keyStr, expense: 0 };
-    acc[keyStr].expense += t.amount;
+      if (!acc[keyStr]) acc[keyStr] = { name: keyStr, expense: 0 };
+      acc[keyStr].expense += Number(t.amount) || 0;
+    } catch {
+      // ignore parse errors
+    }
     
     return acc;
   }, {} as Record<string, { name: string, expense: number }>);
@@ -325,11 +339,22 @@ export default function Dashboard({ user }: { user: User | null }) {
     
     // สร้างข้อมูล Row
     const rows = transactions.map(t => {
-      const dateStr = t.createdAt ? format(parseISO(t.createdAt), "dd/MM/yyyy") : "";
-      const timeStr = t.createdAt ? format(parseISO(t.createdAt), "HH:mm") : "";
+      let dateStr = "";
+      let timeStr = "";
+      if (t.createdAt) {
+        try {
+          const d = parseISO(t.createdAt);
+          if (!isNaN(d.getTime())) {
+            dateStr = format(d, "dd/MM/yyyy");
+            timeStr = format(d, "HH:mm");
+          }
+        } catch {
+          // ignore date parse errors
+        }
+      }
       const catStr = `"${t.category || '-'}"`;
       const note = `"${(t.note || "").replace(/"/g, '""')}"`; // ป้องกันปัญหาลูกน้ำและคำพูดใน CSV
-      const amount = t.amount || 0;
+      const amount = Number(t.amount) || 0;
       return [dateStr, timeStr, catStr, note, amount].join(",");
     });
     

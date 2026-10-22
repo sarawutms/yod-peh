@@ -29,6 +29,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(mockData);
   } catch (error) {
+    console.error("Error in verify-slip API:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
